@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<head>
+  <title>KaiBoy</title>
+  <meta charset="utf-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" type="text/css" href="css/emulator.css">
+</head>
+<body>
+  <section id="title"><h1>KaiBoy</h1></section>
+  <div id="frame">
+    <div id="screen">
+      Choose a GB/GBC file by pressing middle or call button.
+      <p>Controls: D-Pad, LSK for Select, RSK for Start, 9 for A, 8 for B. Machine pause/resume: call key. Save states mgmt: 1 to 6.</p>
+      <p>Original GameBoyCore code by penserbjorne, KaiOS port by Luxferre</p>
+    </div>
+    <canvas id="mainCanvas" width="160" height="144"></canvas>
+  </div>
+  <footer id="softkeys">
+     <div id="choice">&nbsp;</div>
+     <div id="ok">Select</div>
+     <div id="back">&nbsp;</div>
+  </footer>
+  <footer id="emulkeys">
+    <div class="lbl">SELECT</div>
+    <div class="icon"><img src="img/dpad.svg" width=51 height=51 /></div>
+    <div class="lbl start">START</div>
+  </footer>
+  <script src="js/resampler.js"></script>
+  <script src="js/XAudioServer.js"></script>
+  <script src="js/GameBoyCore.js"></script>
+  <script src="js/GameBoyIO.js"></script>
+  <script src="js/emulator.js"></script>
+</body>
