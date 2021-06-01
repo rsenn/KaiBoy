@@ -77,12 +77,12 @@ Resampler.prototype.compileLinearInterpolationFunction = function() {
 Resampler.prototype.compileMultiTapFunction = function() {
 	this.resampler = function(buffer) {
 	  if(!buffer.length) return (this.noReturn) ? 0 : [];
-		var ratioWeight = this.ratioWeight, weight = 0, output0 = 0, output1 = 0,
+		var bufferLength = buffer.length, ratioWeight = this.ratioWeight, weight = 0, output0 = 0, output1 = 0,
 				actualPosition = 0, amountToNext = 0,
 				alreadyProcessedTail = !this.tailExists,
 				outputBuffer = this.outputBuffer, outputOffset = 0, currentPosition = 0;
 		this.tailExists = false; 
-		do {
+ 		do {
 			if(alreadyProcessedTail) {
 				weight = ratioWeight;
 				output0 = 0;
@@ -118,7 +118,7 @@ Resampler.prototype.compileMultiTapFunction = function() {
 				this.tailExists = true;
 				break;
 			}
-		} while (actualPosition < bufferLength && outputOffset < outLength);
+		} while (actualPosition < bufferLength && outputOffset < outputBuffer.length);
 		return this.bufferSlice(outputOffset);
 	}
 }

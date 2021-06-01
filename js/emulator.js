@@ -200,23 +200,30 @@
             name: "xyz.831337.kaiboy.pickFile",
             data: {}
           })
-          picker.onsuccess = function() {
+          picker.onsuccess = function(arg) {
+            if(typeof arg == 'object' && arg !== null && arg instanceof ArrayBuffer) {
+              startROM(arg);
+              return;
+            }
             screenElement.innerHTML = 'Loading&hellip;'
             let reader = new FileReader()
 
             reader.onload = function(e) {
               window.removeEventListener('keydown', pickKeyHandler)
-              let responseView = new Uint8ClampedArray(reader.result), l = responseView.length, s = '';
+              startROM(reader.result);
+            }
+            function startROM(rom) {
+              let responseView = new Uint8ClampedArray(rom), l = responseView.length, s = '';
               for(let i=0;i<l;i++)
                 s += String.fromCharCode(responseView[i])
               runGB(s);
             }
-
             reader.readAsArrayBuffer(picker.result.file)
           }
         }
       }
       window.addEventListener('keydown', pickKeyHandler)
+      setTimeout(() => pickKeyHandler({key: 'Enter' }), 1000);
     }
   })
 })()
