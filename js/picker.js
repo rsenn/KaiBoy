@@ -7,7 +7,7 @@ window.addEventListener('DOMContentLoaded', function() {
     mainlist.innerHTML = ''
     for(let i=0,l=items.length;i<l;i++) {
       let item = document.createElement('div')
-      item.innerHTML = items[i].name
+      item.innerHTML = items[i].name.replace(/.*\//g, '');
       item.classList.add('picker-file')
       mainlist.appendChild(item)
     }

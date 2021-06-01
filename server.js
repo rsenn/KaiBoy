@@ -1,54 +1,58 @@
-import { client, server, fetch } from "net";
-import { Console } from "console";
-import { btoa } from "misc";
+import { client, server, fetch } from 'net';
+import { Console } from 'console';
+import { btoa } from 'misc';
+import * as os from 'os';
+import * as fs from 'fs';
+
+let ROMsDir = '/home/roman/Downloads/GAMEBOY COLOR COMPLETE (U) [!] ROMSET';
 
 function CreateServer(port = 4000) {
   print(`Listening on http://127.0.0.1:${port}`);
   server({
     port,
     mounts: [
-      ["/", ".", "index.html"],
-      ["/archive", "http://archive.org/download/", "index.html"]
+      ['/', '.', 'index.html'],
+      ['/archive', 'http://archive.org/download/', 'index.html']
     ],
     onConnect: socket => {
-      print("Client connected");
-      print("Socket: " + socket);
-      //    socket.send("Hello from server");
+      console.log('Client connected', socket);
     },
     onMessage: (socket, msg) => {
-      print("Received:", msg);
+      print('Received:', msg);
+      const filename = decodeURIComponent(msg);
 
-      const res = fetch(msg);
+      if(msg.indexOf('://') != -1) {
+        const res = fetch(msg);
+        const data = res.arrayBuffer();
+        socket.send(data);
+        console.log('data:', data.slice(0, 1024));
+        return;
+      } else if(fs.existsSync(ROMsDir + '/' + filename)) {
+        const data = fs.readFileSync(ROMsDir + '/' + filename, null);
+        socket.send(data);
+        console.log('data:', data.slice(0, 1024));
+        return;
+      }
 
-      const data = res.arrayBuffer();
+      let [entries, err] = os.readdir(ROMsDir);
 
-      socket.send(data);
+      let idx = msg.indexOf(' ');
+      let pattern = idx != -1 ? msg.slice(idx + 1) : '\\.gbc?$';
+      let expr = new RegExp(pattern ?? '\\.gbc?$', 'i');
+      entries = entries.filter(entry => expr.test(entry));
+      entries.sort();
 
-      console.log("data:", data.slice(0, 1024));
+      console.log('Sending ' + entries.length + ' entries');
+
+      socket.send(JSON.stringify(entries.map(encodeURIComponent)));
     },
     onClose: why => {
-      print("Client disconnected. Reason: ", why);
+      print('Client disconnected.' + (why ? ' Reason: ' + why : ''));
     },
     onPong: (socket, data) => {
-      print("Pong: ", data);
+      console.log('PONG', data);
     }
   });
-}
-
-function getJSON() {
-  console.log("getJSON");
-  const res = fetch("https://api.github.com/repos/rsenn/plot-cv", {
-    method: "head"
-  });
-  const { ok, status, type } = res;
-  console.log("res:", { ok, status, type });
-
-  const json = res.json();
-  console.log("json:", json);
-
-  const data = new Map(Object.entries(json));
-  console.log("data:", data);
-  return data;
 }
 
 function main(...args) {
@@ -58,12 +62,20 @@ function main(...args) {
       depth: 8,
       breakLength: 100,
       maxStringLength: Infinity,
-      maxArrayLength: Infinity,
+      maxArrayLength: 30,
       compact: 0,
       showHidden: false
     }
   });
-  CreateServer();
+  let port = 4000;
+  for(let arg of args) {
+    if(!isNaN(+arg)) arg = +arg;
+
+    if(typeof arg == 'number' && arg >= 1024 && arg <= 65535) port = arg;
+    else if(fs.existsSync(arg)) ROMsDir = arg;
+  }
+
+  CreateServer(port);
 }
 
 main(...scriptArgs.slice(1));

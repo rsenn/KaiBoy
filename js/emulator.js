@@ -111,6 +111,15 @@
     var mainCanvas = document.getElementById("mainCanvas"),
       KaiBoyMachinePaused = true;
 
+    window.resizeCanvas= function resizeCanvas(size) {
+      mainCanvas.style.setProperty('position', 'absolute');
+      mainCanvas.style.setProperty('height', size);
+      mainCanvas.style.setProperty('width', 'auto');
+      mainCanvas.style.setProperty('top', '50%');
+      mainCanvas.style.setProperty('left', '50%');
+      mainCanvas.style.setProperty('transform', 'translate(-50%,-50%)');
+    }
+
     document.body.classList.add("ingame");
 
     document.getElementById("choice").innerHTML = "Select";
@@ -146,7 +155,7 @@
             KaiBoyMachinePaused = false;
             run();
           }
-        }
+        } else console.log("e.key", e.key);
       };
       window.onkeyup = function(e) {
         if(e.key in mapping) {
@@ -177,10 +186,10 @@
       var request = new XMLHttpRequest();
       request.onload = function() {
         let responseView = new Uint8ClampedArray(request.response),
-          l = responseView.length,
-          s = "";
+        l = responseView.length,
+        s = "";
         for(let i = 0; i < l; i++) s += String.fromCharCode(responseView[i]);
-        runGB(s);
+          runGB(s);
       };
       request.open("GET", config.src);
       request.responseType = "arraybuffer";
@@ -198,18 +207,19 @@
               startROM(arg);
               return;
             }
-            screenElement.innerHTML = "Loading&hellip;";
+            screenElement.innerHTML = "Loading "+picker.result.file.name+" &hellip;";
             let reader = new FileReader();
 
             reader.onload = function(e) {
-              window.removeEventListener("keydown", pickKeyHandler);
               startROM(reader.result);
             };
             function startROM(rom) {
               let responseView = new Uint8ClampedArray(rom),
-                l = responseView.length,
-                s = "";
+              l = responseView.length,
+              s = "";
               for(let i = 0; i < l; i++) s += String.fromCharCode(responseView[i]);
+                window.removeEventListener("keydown", pickKeyHandler);
+              console.log("s",s.slice(0,100));
               runGB(s);
             }
             reader.readAsArrayBuffer(picker.result.file);
